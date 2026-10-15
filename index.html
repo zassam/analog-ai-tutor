@@ -59,7 +59,8 @@
               <span id="stu-prob-teacher-badge" class="text-xs text-indigo-200 font-semibold"></span>
             </div>
             <h2 id="stu-prob-title" class="text-xl font-bold text-white"></h2>
-            <div id="stu-prob-desc" class="text-sm text-indigo-100 bg-white/10 rounded-xl p-3.5 leading-relaxed border border-white/10"></div>
+            <!-- whitespace-pre-wrap 추가됨 -->
+            <div id="stu-prob-desc" class="text-sm text-indigo-100 bg-white/10 rounded-xl p-3.5 leading-relaxed border border-white/10 whitespace-pre-wrap"></div>
             <div id="stu-prob-attachments" class="force-hidden flex flex-wrap gap-2 pt-1"></div>
           </div>
           <div class="flex sm:flex-row lg:flex-col gap-2 shrink-0 lg:w-48 justify-center">
@@ -149,7 +150,6 @@
                     <p class="text-sm font-bold text-slate-700">풀이 이미지를 드래그하거나 아래 버튼으로 첨부하세요</p>
                     <p class="text-xs text-slate-500 mt-1">화면 캡처 후 Ctrl + V 로 붙여넣기도 가능합니다!</p>
                   </div>
-                  <!-- [핵심] 카메라 및 파일 입력 방식을 label 래핑으로 변경하여 모바일 호환성 100% 해결 -->
                   <div class="flex flex-wrap justify-center gap-2 relative z-20">
                     <label class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm flex items-center">
                       <i class="fa-regular fa-folder-open mr-1 text-indigo-600"></i>파일 첨부하기
@@ -218,7 +218,8 @@
                 <h3 id="fb-title" class="text-base font-bold text-slate-900 mt-1.5"></h3>
               </div>
             </div>
-            <div id="fb-content" class="prose max-w-none bg-amber-50/40 border border-amber-200/80 rounded-2xl p-6 text-[15px] leading-relaxed"></div>
+            <!-- whitespace-pre-wrap 추가됨 -->
+            <div id="fb-content" class="prose max-w-none bg-amber-50/40 border border-amber-200/80 rounded-2xl p-6 text-[15px] leading-relaxed whitespace-pre-wrap"></div>
           </div>
         </div>
       </div>
@@ -288,7 +289,8 @@
             <div id="teacher-detail-content" class="force-hidden space-y-5">
               <div><h3 id="td-title" class="text-lg font-bold"></h3></div>
               <div class="bg-slate-50 border rounded-xl p-3 text-center"><img id="td-image" src="" class="max-h-72 mx-auto rounded-lg bg-white shadow-sm object-contain"></div>
-              <div><h4 class="text-xs font-bold text-slate-500 uppercase mb-2">AI 피드백 내용</h4><div id="td-feedback" class="bg-amber-50/50 border border-amber-200 rounded-xl p-5 text-sm leading-relaxed space-y-2.5"></div></div>
+              <!-- whitespace-pre-wrap 추가됨 -->
+              <div><h4 class="text-xs font-bold text-slate-500 uppercase mb-2">AI 피드백 내용</h4><div id="td-feedback" class="bg-amber-50/50 border border-amber-200 rounded-xl p-5 text-sm leading-relaxed whitespace-pre-wrap"></div></div>
             </div>
           </div>
         </div>
@@ -315,7 +317,8 @@
               <span class="text-xs font-bold text-slate-500">학생 화면 상단 표시 미리보기</span>
               <div class="bg-slate-900 text-white rounded-2xl p-5 shadow space-y-3">
                 <h4 id="tp-preview-title" class="text-lg font-bold"></h4>
-                <div id="tp-preview-desc" class="text-sm text-indigo-100 bg-white/10 rounded-xl p-3.5"></div>
+                <!-- whitespace-pre-wrap 추가됨 -->
+                <div id="tp-preview-desc" class="text-sm text-indigo-100 bg-white/10 rounded-xl p-3.5 whitespace-pre-wrap"></div>
                 <div id="tp-preview-attachments" class="force-hidden flex flex-wrap gap-2 pt-2"></div>
               </div>
             </div>
@@ -400,14 +403,14 @@
       } 
     }
 
-    // v28 데이터 버전
+    // 데이터 호환성을 위해 v28 유지
     const STORAGE_KEYS = { TEACHERS: 'hw_ai_teachers_v28', SUBMISSIONS: 'hw_ai_submissions_v28', PROBLEMS: 'hw_ai_problems_v28', API_KEY: 'hw_ai_gemini_key_v28', CURRENT_TEACHER: 'hw_ai_logged_teacher_v28' };
 
     let teachers=[], submissions=[], teacherProblems={}, currentTeacher=null;
     let studentInputMode='pad', currentUploadedDataUrl='', tempTeacherAttachments=[];
     let qrCodeInstance=null, padCanvas, padCtx, isDrawing=false, penColor='#0f172a', penWidth=3, isEraser=false;
     let canvasHistory=[], hasUserDrawnOnPad=false, padProblemHeaderText='';
-    let editingSubId = null; // 학생 수정 모드 ID
+    let editingSubId = null; 
 
     window.addEventListener('DOMContentLoaded', () => {
       const runSafe = (fn) => { try { fn(); } catch(e) { console.error("오류 발생:", e); } };
@@ -510,7 +513,7 @@
           document.getElementById('upload-preview-img').src = currentUploadedDataUrl;
         }; img.src = e.target.result;
       }; reader.readAsDataURL(file);
-      event.target.value = ''; // 동일 파일 재선택 허용
+      event.target.value = ''; 
     }
 
     function clearUploadedImage() {
@@ -563,10 +566,29 @@
       if (role === 'teacher' && currentTeacher) { renderTeacherSubmissionsList(); renderBatchRecordTable(); }
     }
 
-    function renderMathInContainer(element) { if (window.renderMathInElement) renderMathInElement(element, { delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError: false }); }
+    // [핵심 패치 1] KaTeX 렌더러가 AI의 괄호형 수식 기호인 \(,\), [, ] 도 완벽하게 인식하도록 확장
+    function renderMathInContainer(element) { 
+      if (window.renderMathInElement) {
+        renderMathInElement(element, { 
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '[', right: ']', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false}
+          ], 
+          throwOnError: false 
+        }); 
+      }
+    }
+
+    // [핵심 패치 2] 줄바꿈 코드를 무작정 <br>로 바꾸지 않고, CSS의 whitespace-pre-wrap 속성으로 안전하게 줄바꿈 처리하여 수식 간섭 완벽 차단
     function formatFeedbackHtml(txt) {
       if(!txt) return '';
-      return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g, '<strong class="text-indigo-900 bg-indigo-100/60 px-1 rounded">$1</strong>').replace(/^### (.+)$/gm, '<h4 class="font-extrabold text-indigo-800 mt-4 mb-1">$1</h4>').replace(/\n/g, '<br>');
+      return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                .replace(/```math/g, '').replace(/```/g, '') // 불필요한 마크다운 코드블록 제거
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="text-indigo-900 bg-indigo-100/60 px-1 rounded">$1</strong>')
+                .replace(/^### (.+)$/gm, '<h4 class="font-extrabold text-indigo-800 mt-4 mb-1">$1</h4>');
+                // 기존의 .replace(/\n/g, '<br>') 는 삭제되었습니다.
     }
 
     function fillSampleStudentData() {
@@ -579,7 +601,6 @@
       const img=new Image(); img.onload=()=>{ padCtx.clearRect(0,0,padCanvas.width,padCanvas.height); padCtx.drawImage(img,0,0); hasUserDrawnOnPad=true; saveCanvasState(); }; img.src=currentUploadedDataUrl;
     }
 
-    // 학생 본인 제출 관리 기능 추가
     function openStudentSubmissionsModal() {
       const name = document.getElementById('stu-name').value.trim();
       if(!name) return alert('이름과 학번 정보를 입력한 후 [내 제출 확인] 버튼을 눌러주세요.');
@@ -611,7 +632,7 @@
       if(!confirm('정말 이 제출 내역을 삭제하시겠습니까?')) return;
       submissions = submissions.filter(s => s.id !== id);
       safeSetLocal(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(submissions));
-      openStudentSubmissionsModal(); // 목록 새로고침
+      openStudentSubmissionsModal(); 
     }
 
     function loadStudentSubmissionToEdit(id) {
@@ -729,7 +750,7 @@
         }
         
         safeSetLocal(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(submissions));
-        cancelEditMode(); // 제출 완료 후 수정 모드 초기화
+        cancelEditMode(); 
         
         setDisplay('feedback-loading', 'none'); setDisplay('feedback-result', 'block');
         document.getElementById('fb-title').textContent = autoTitle;
