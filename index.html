@@ -274,7 +274,6 @@
 
         <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
           <button id="subtab-submissions" onclick="switchTeacherSubtab('submissions')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white">1. 문항별 제출 확인</button>
-          <!-- [추가됨] 학생별 모아보기 탭 추가 -->
           <button id="subtab-student-view" onclick="switchTeacherSubtab('student-view')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border">2. 학생별 모아보기</button>
           <button id="subtab-problem" onclick="switchTeacherSubtab('problem')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border">3. 오늘의 문제 등록</button>
           <button id="subtab-record" onclick="switchTeacherSubtab('record')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border">4. 생기부 특기사항 다운로드</button>
@@ -296,7 +295,7 @@
           </div>
         </div>
 
-        <!-- [추가됨] 2. 학생별 모아보기 -->
+        <!-- 2. 학생별 모아보기 -->
         <div id="teacher-subview-student-view" class="force-hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border p-5 flex flex-col max-h-[700px]">
             <div class="flex justify-between pb-3 mb-3 border-b"><h3 class="font-bold text-sm">제출 학생 목록</h3></div>
@@ -304,7 +303,6 @@
           </div>
           <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border p-6 flex flex-col max-h-[700px]">
             <div id="teacher-student-detail-empty" class="py-24 text-center text-slate-400 block"><p class="text-sm font-semibold">왼쪽 목록에서 학생을 클릭하세요.</p></div>
-            <!-- 여러 문항이 세로로 나열되도록 스크롤 영역 지정 -->
             <div id="teacher-student-detail-content" class="force-hidden flex-1 overflow-y-auto space-y-6 pr-3"></div>
           </div>
         </div>
@@ -437,8 +435,7 @@
       } 
     }
 
-    // 버전 33
-    const STORAGE_KEYS = { TEACHERS: 'hw_ai_teachers_v33', API_KEY: 'hw_ai_gemini_key_v33', CURRENT_TEACHER: 'hw_ai_logged_teacher_v33' };
+    const STORAGE_KEYS = { TEACHERS: 'hw_ai_teachers_v34', API_KEY: 'hw_ai_gemini_key_v34', CURRENT_TEACHER: 'hw_ai_logged_teacher_v34' };
 
     let teachers=[], submissions=[], teacherProblems={}, currentTeacher=null;
     let studentInputMode='pad', currentUploadedDataUrl='', tempTeacherAttachments=[];
@@ -569,7 +566,7 @@
       
       const titleEl = document.getElementById('stu-prob-title'); if(titleEl) titleEl.textContent = prob.title;
       const descEl = document.getElementById('stu-prob-desc');
-      if(descEl) { descEl.innerHTML = formatFeedbackHtml(prob.desc); renderMathInContainer(descEl); }
+      if(descEl) { descEl.innerHTML = formatFeedbackHtml(prob.desc, true); renderMathInContainer(descEl); }
       
       const attWrap = document.getElementById('stu-prob-attachments');
       if(attWrap) {
@@ -689,9 +686,17 @@
       }
     }
 
-    function formatFeedbackHtml(txt) {
+    // [핵심 패치] 학생 화면에는 '생기부 기록'을 숨기기 위한 파라미터(isStudentView) 추가
+    function formatFeedbackHtml(txt, isStudentView = false) {
       if(!txt) return '';
-      return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      let res = txt;
+      
+      // 학생이 보는 화면이라면 '### 5. 생기부 기록' 파트를 통째로 잘라냅니다.
+      if (isStudentView) {
+        res = res.split(/###\s*5\.?\s*생기부\s*기록/)[0].trim();
+      }
+
+      return res.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
                 .replace(/```math/g, '').replace(/```/g, '') 
                 .replace(/\*\*(.+?)\*\*/g, '<strong class="text-indigo-900 bg-indigo-100/60 px-1 rounded">$1</strong>')
                 .replace(/^### (.+)$/gm, '<h4 class="font-extrabold text-indigo-800 mt-4 mb-1">$1</h4>');
@@ -861,7 +866,12 @@
         
         setDisplay('feedback-loading', 'none'); setDisplay('feedback-result', 'block');
         document.getElementById('fb-title').textContent = autoTitle;
-        const fbContentEl = document.getElementById('fb-content'); fbContentEl.innerHTML = formatFeedbackHtml(feedback); renderMathInContainer(fbContentEl);
+        
+        // [핵심 패치] 학생 화면에는 생기부 기록이 보이지 않도록 true 전달
+        const fbContentEl = document.getElementById('fb-content'); 
+        fbContentEl.innerHTML = formatFeedbackHtml(feedback, true); 
+        renderMathInContainer(fbContentEl);
+
       } catch (e) { 
         alert(e.message); 
         setDisplay('feedback-loading', 'none'); 
@@ -886,10 +896,8 @@
       setDisplay('teacher-dashboard', 'none'); setDisplay('teacher-login-box', 'block');
     }
 
-    // [핵심 추가] 탭 메뉴에 '학생별 모아보기'를 위한 로직 반영
     function switchTeacherSubtab(tab) {
       ['submissions', 'student-view', 'problem', 'record'].forEach(t => {
-        // submissions와 student-view는 좌우 2단 분할(grid) 화면이므로 grid로 렌더링
         setDisplay(`teacher-subview-${t}`, t === tab ? (t === 'submissions' || t === 'student-view' ? 'grid' : 'block') : 'none');
         const btn = document.getElementById(`subtab-${t}`);
         if(btn) btn.className = t === tab ? 'px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white' : 'px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border';
@@ -923,7 +931,7 @@
 
     function previewTeacherProblem() {
       document.getElementById('tp-preview-title').textContent = document.getElementById('tp-title').value.trim() || '제목 없음';
-      const descEl = document.getElementById('tp-preview-desc'); descEl.innerHTML = formatFeedbackHtml(document.getElementById('tp-desc').value.trim()); renderMathInContainer(descEl);
+      const descEl = document.getElementById('tp-preview-desc'); descEl.innerHTML = formatFeedbackHtml(document.getElementById('tp-desc').value.trim(), false); renderMathInContainer(descEl);
       const listWrap = document.getElementById('tp-attachments-list'); listWrap.innerHTML = '';
       tempTeacherAttachments.forEach(att => {
         const icon = att.type === 'pdf' ? '<i class="fa-solid fa-file-pdf text-rose-500 mr-2 text-lg"></i>' : '<i class="fa-solid fa-image text-indigo-500 mr-2 text-lg"></i>';
@@ -962,10 +970,12 @@
       const item = submissions.find(s=>s.id===id); if(!item) return;
       setDisplay('teacher-detail-empty', 'none'); setDisplay('teacher-detail-content', 'block');
       document.getElementById('td-title').textContent = item.title; document.getElementById('td-image').src = item.imageData;
-      const fb = document.getElementById('td-feedback'); fb.innerHTML = formatFeedbackHtml(item.feedback); renderMathInContainer(fb);
+      const fb = document.getElementById('td-feedback'); 
+      // 선생님 화면이므로 생기부 기록 숨김 처리 해제 (false)
+      fb.innerHTML = formatFeedbackHtml(item.feedback, false); 
+      renderMathInContainer(fb);
     }
 
-    // [핵심 추가] 2. 학생별 모아보기 - 왼쪽 학생 명단 렌더링
     function renderTeacherStudentList() {
       if(!currentTeacher) return;
       const listEl = document.getElementById('teacher-student-list'); listEl.innerHTML = '';
@@ -978,7 +988,6 @@
         groups[k].push(s);
       });
 
-      // 학년, 반, 번호 순으로 깔끔하게 오름차순 정렬
       const sortedKeys = Object.keys(groups).sort((a,b) => {
          const pa = a.split('_').map(Number);
          const pb = b.split('_').map(Number);
@@ -1001,10 +1010,8 @@
       }
     }
 
-    // [핵심 추가] 2. 학생별 모아보기 - 오른쪽 상세 내용 (해당 학생의 모든 문항 세로 나열)
     function selectStudentDetail(k) {
       const list = submissions.filter(s => s.teacherId === currentTeacher.id);
-      // 현재 선택된 학생의 제출물만 필터링 (최신 제출이 위로 오도록)
       const mySubs = list.filter(s => `${s.grade}_${s.classNum}_${s.number}_${s.name}` === k);
       
       setDisplay('teacher-student-detail-empty', 'none'); 
@@ -1024,13 +1031,13 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div><img src="${sub.imageData}" class="w-full rounded-lg bg-white shadow-sm border object-contain max-h-[400px]"></div>
-              <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto max-h-[400px]">${formatFeedbackHtml(sub.feedback)}</div>
+              <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto max-h-[400px]">${formatFeedbackHtml(sub.feedback, false)}</div>
             </div>
           </div>
         `;
       });
       contentEl.innerHTML = html;
-      renderMathInContainer(contentEl); // 수식 깨짐 방지 렌더링 적용
+      renderMathInContainer(contentEl); 
     }
 
     function renderSubmissionStatusBoard() {
