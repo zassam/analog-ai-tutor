@@ -59,7 +59,6 @@
               <span id="stu-prob-teacher-badge" class="text-xs text-indigo-200 font-semibold"></span>
             </div>
             <h2 id="stu-prob-title" class="text-xl font-bold text-white"></h2>
-            <!-- whitespace-pre-wrap 추가됨 -->
             <div id="stu-prob-desc" class="text-sm text-indigo-100 bg-white/10 rounded-xl p-3.5 leading-relaxed border border-white/10 whitespace-pre-wrap"></div>
             <div id="stu-prob-attachments" class="force-hidden flex flex-wrap gap-2 pt-1"></div>
           </div>
@@ -218,7 +217,6 @@
                 <h3 id="fb-title" class="text-base font-bold text-slate-900 mt-1.5"></h3>
               </div>
             </div>
-            <!-- whitespace-pre-wrap 추가됨 -->
             <div id="fb-content" class="prose max-w-none bg-amber-50/40 border border-amber-200/80 rounded-2xl p-6 text-[15px] leading-relaxed whitespace-pre-wrap"></div>
           </div>
         </div>
@@ -232,7 +230,8 @@
           <div><label class="block text-[11px] font-bold text-slate-500">담당 선생님</label><select id="status-teacher-id" onchange="renderSubmissionStatusBoard()" class="rounded-lg border px-3 py-1.5 text-sm"></select></div>
           <div><label class="block text-[11px] font-bold text-slate-500">학년</label><select id="status-grade" onchange="renderSubmissionStatusBoard()" class="rounded-lg border px-3 py-1.5 text-sm"></select></div>
           <div><label class="block text-[11px] font-bold text-slate-500">반</label><select id="status-class" onchange="renderSubmissionStatusBoard()" class="rounded-lg border px-3 py-1.5 text-sm"></select></div>
-          <div><label class="block text-[11px] font-bold text-slate-500">학급 인원수</label><select id="status-total-count" onchange="renderSubmissionStatusBoard()" class="rounded-lg border px-3 py-1.5 text-sm"><option value="30" selected>30명 (1~30번)</option></select></div>
+          <!-- [수정됨] 학급 인원수 선택 드롭다운 (JS에서 동적 생성됨) -->
+          <div><label class="block text-[11px] font-bold text-slate-500">학급 인원수</label><select id="status-total-count" onchange="renderSubmissionStatusBoard()" class="rounded-lg border px-3 py-1.5 text-sm"></select></div>
         </div>
         <button onclick="toggleWarningFullscreen()" class="px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl shadow-md warning-pulse"><i class="fa-solid fa-triangle-exclamation"></i> 미제출 경고 화면 켜기</button>
       </div>
@@ -289,7 +288,6 @@
             <div id="teacher-detail-content" class="force-hidden space-y-5">
               <div><h3 id="td-title" class="text-lg font-bold"></h3></div>
               <div class="bg-slate-50 border rounded-xl p-3 text-center"><img id="td-image" src="" class="max-h-72 mx-auto rounded-lg bg-white shadow-sm object-contain"></div>
-              <!-- whitespace-pre-wrap 추가됨 -->
               <div><h4 class="text-xs font-bold text-slate-500 uppercase mb-2">AI 피드백 내용</h4><div id="td-feedback" class="bg-amber-50/50 border border-amber-200 rounded-xl p-5 text-sm leading-relaxed whitespace-pre-wrap"></div></div>
             </div>
           </div>
@@ -317,7 +315,6 @@
               <span class="text-xs font-bold text-slate-500">학생 화면 상단 표시 미리보기</span>
               <div class="bg-slate-900 text-white rounded-2xl p-5 shadow space-y-3">
                 <h4 id="tp-preview-title" class="text-lg font-bold"></h4>
-                <!-- whitespace-pre-wrap 추가됨 -->
                 <div id="tp-preview-desc" class="text-sm text-indigo-100 bg-white/10 rounded-xl p-3.5 whitespace-pre-wrap"></div>
                 <div id="tp-preview-attachments" class="force-hidden flex flex-wrap gap-2 pt-2"></div>
               </div>
@@ -437,10 +434,22 @@
     function populateSelectOptions() {
       const gSel = document.querySelectorAll('#stu-grade, #status-grade, #filter-grade');
       gSel.forEach(el => { let h=''; for(let g=1; g<=6; g++) h+=`<option value="${g}">${g}학년</option>`; el.innerHTML=h; });
+      
       const cSel = document.querySelectorAll('#stu-class, #status-class, #filter-class');
       cSel.forEach(el => { let h=''; for(let c=1; c<=20; c++) h+=`<option value="${c}">${c}반</option>`; el.innerHTML=h; });
+      
       const nSel = document.getElementById('stu-number');
       if(nSel) { let h=''; for(let n=1; n<=40; n++) h+=`<option value="${n}">${n}번</option>`; nSel.innerHTML=h; }
+
+      // [수정됨] 학급 인원수를 10명~40명까지 선택할 수 있도록 동적 생성 (기본값 35명)
+      const tSel = document.getElementById('status-total-count');
+      if(tSel) { 
+        let h=''; 
+        for(let t=10; t<=40; t++) { 
+          h+=`<option value="${t}" ${t===35 ? 'selected' : ''}>${t}명 (1~${t}번)</option>`; 
+        } 
+        tSel.innerHTML=h; 
+      }
     }
 
     function renderTeacherSelects() {
@@ -485,6 +494,7 @@
 
     function setupDragAndDropAndPaste() {
       const dropZone = document.getElementById('drop-zone'); if(!dropZone) return;
+      dropZone.addEventListener('click', () => { if (!currentUploadedDataUrl) document.getElementById('file-input').click(); });
       dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50'); });
       dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-indigo-500', 'bg-indigo-50'); });
       dropZone.addEventListener('drop', (e) => {
@@ -566,7 +576,6 @@
       if (role === 'teacher' && currentTeacher) { renderTeacherSubmissionsList(); renderBatchRecordTable(); }
     }
 
-    // [핵심 패치 1] KaTeX 렌더러가 AI의 괄호형 수식 기호인 \(,\), [, ] 도 완벽하게 인식하도록 확장
     function renderMathInContainer(element) { 
       if (window.renderMathInElement) {
         renderMathInElement(element, { 
@@ -581,14 +590,12 @@
       }
     }
 
-    // [핵심 패치 2] 줄바꿈 코드를 무작정 <br>로 바꾸지 않고, CSS의 whitespace-pre-wrap 속성으로 안전하게 줄바꿈 처리하여 수식 간섭 완벽 차단
     function formatFeedbackHtml(txt) {
       if(!txt) return '';
       return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                .replace(/```math/g, '').replace(/```/g, '') // 불필요한 마크다운 코드블록 제거
+                .replace(/```math/g, '').replace(/```/g, '') 
                 .replace(/\*\*(.+?)\*\*/g, '<strong class="text-indigo-900 bg-indigo-100/60 px-1 rounded">$1</strong>')
                 .replace(/^### (.+)$/gm, '<h4 class="font-extrabold text-indigo-800 mt-4 mb-1">$1</h4>');
-                // 기존의 .replace(/\n/g, '<br>') 는 삭제되었습니다.
     }
 
     function fillSampleStudentData() {
