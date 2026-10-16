@@ -143,7 +143,7 @@
             </div>
 
             <div id="student-upload-container" class="force-hidden">
-              <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50/70">
+              <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50/70 transition-colors">
                 <div id="upload-placeholder" class="space-y-4 py-4 block">
                   <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                   <div>
@@ -151,11 +151,11 @@
                     <p class="text-xs text-slate-500 mt-1">화면 캡처 후 Ctrl + V 로 붙여넣기도 가능합니다!</p>
                   </div>
                   <div class="flex flex-wrap justify-center gap-2 relative z-20">
-                    <label class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm flex items-center">
+                    <label class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm flex items-center transition">
                       <i class="fa-regular fa-folder-open mr-1 text-indigo-600"></i>파일 첨부하기
                       <input type="file" accept="image/*" style="display:none;" onchange="handleFileSelect(event)">
                     </label>
-                    <label class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm flex items-center">
+                    <label class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm flex items-center transition">
                       <i class="fa-solid fa-camera mr-1 text-emerald-600"></i>카메라 촬영
                       <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)">
                     </label>
@@ -273,10 +273,10 @@
         </div>
 
         <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-          <button id="subtab-submissions" onclick="switchTeacherSubtab('submissions')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white">1. 문항별 제출 확인</button>
-          <button id="subtab-student-view" onclick="switchTeacherSubtab('student-view')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border">2. 학생별 모아보기</button>
-          <button id="subtab-problem" onclick="switchTeacherSubtab('problem')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border">3. 오늘의 문제 등록</button>
-          <button id="subtab-record" onclick="switchTeacherSubtab('record')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border">4. 생기부 특기사항 다운로드</button>
+          <button id="subtab-submissions" onclick="switchTeacherSubtab('submissions')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white transition-colors">1. 문항별 제출 확인</button>
+          <button id="subtab-student-view" onclick="switchTeacherSubtab('student-view')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border transition-colors">2. 학생별 모아보기</button>
+          <button id="subtab-problem" onclick="switchTeacherSubtab('problem')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border transition-colors">3. 오늘의 문제 등록</button>
+          <button id="subtab-record" onclick="switchTeacherSubtab('record')" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-700 border transition-colors">4. 생기부 특기사항 다운로드</button>
         </div>
 
         <!-- 1. 문항별 제출 확인 -->
@@ -307,23 +307,30 @@
           </div>
         </div>
 
-        <!-- 3. 오늘의 문제 등록 -->
+        <!-- 3. 오늘의 문제 등록 (드래그 앤 드롭 존 추가) -->
         <div id="teacher-subview-problem" class="force-hidden">
           <div class="bg-white rounded-2xl shadow-sm border p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-6 space-y-4">
-              <h3 class="text-lg font-bold text-slate-900">오늘의 문제 등록 (PDF 업로드 지원)</h3>
-              <input type="text" id="tp-title" placeholder="문제 제목" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
-              <textarea id="tp-desc" rows="4" oninput="previewTeacherProblem()" placeholder="문제 내용 (LaTeX $$...$$ 가능)" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <label class="block text-xs font-bold text-slate-700 mb-2">문제 첨부 (이미지/PDF)</label>
-                <div class="flex flex-wrap gap-2 mb-3">
-                  <label class="px-4 py-2 bg-white border hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold shadow-sm cursor-pointer">
-                    파일 추가
+              <h3 class="text-lg font-bold text-slate-900">오늘의 문제 등록</h3>
+              <input type="text" id="tp-title" placeholder="문제 제목 (예: 3단원 방정식 5번)" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
+              <textarea id="tp-desc" rows="4" oninput="previewTeacherProblem()" placeholder="문제 부연 설명 (LaTeX $$...$$ 가능)" class="w-full rounded-xl border border-slate-300 p-3.5 text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
+              
+              <!-- [핵심 변경] 선생님용 드래그 앤 드롭 존 -->
+              <div id="tp-drop-zone" class="bg-slate-50 p-6 rounded-xl border-2 border-dashed border-slate-300 transition-colors">
+                <div class="text-center mb-3">
+                  <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-300 mb-2"></i>
+                  <p class="text-sm font-bold text-slate-700">문제 파일을 이곳에 드래그하거나 아래 버튼으로 첨부하세요</p>
+                  <p class="text-[11px] text-slate-500 mt-1">이미지 및 PDF 파일 지원</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-2 mb-3">
+                  <label class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold shadow-sm cursor-pointer transition">
+                    파일 선택하기
                     <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleTeacherProblemFiles(event)">
                   </label>
                 </div>
                 <div id="tp-attachments-list" class="flex flex-col gap-2"></div>
               </div>
+
               <button type="button" onclick="saveTeacherProblem()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition text-sm">게시하기</button>
             </div>
             <div class="lg:col-span-6 bg-slate-100 rounded-2xl border border-slate-200 p-5 space-y-4">
@@ -435,7 +442,8 @@
       } 
     }
 
-    const STORAGE_KEYS = { TEACHERS: 'hw_ai_teachers_v34', API_KEY: 'hw_ai_gemini_key_v34', CURRENT_TEACHER: 'hw_ai_logged_teacher_v34' };
+    // 버전 35
+    const STORAGE_KEYS = { TEACHERS: 'hw_ai_teachers_v35', API_KEY: 'hw_ai_gemini_key_v35', CURRENT_TEACHER: 'hw_ai_logged_teacher_v35' };
 
     let teachers=[], submissions=[], teacherProblems={}, currentTeacher=null;
     let studentInputMode='pad', currentUploadedDataUrl='', tempTeacherAttachments=[];
@@ -593,14 +601,38 @@
       } else { saveCanvasState(); }
     }
 
+    // [핵심 패치] 드래그 앤 드롭 영역 이벤트 설정 추가
     function setupDragAndDropAndPaste() {
-      const dropZone = document.getElementById('drop-zone'); if(!dropZone) return;
-      dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50'); });
-      dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-indigo-500', 'bg-indigo-50'); });
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault(); dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-        if(e.dataTransfer.files && e.dataTransfer.files[0]) { switchStudentInputMode('upload'); handleFileSelect({ target: { files: e.dataTransfer.files } }); }
-      });
+      // 1. 학생 화면 제출용 드롭존
+      const dropZone = document.getElementById('drop-zone'); 
+      if(dropZone) {
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-indigo-500', 'bg-indigo-50'); });
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault(); dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+          if(e.dataTransfer.files && e.dataTransfer.files[0]) { switchStudentInputMode('upload'); handleFileSelect({ target: { files: e.dataTransfer.files } }); }
+        });
+      }
+
+      // 2. 선생님 문제 등록용 드롭존
+      const tpDropZone = document.getElementById('tp-drop-zone');
+      if(tpDropZone) {
+        tpDropZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          tpDropZone.classList.add('border-indigo-500', 'bg-indigo-50');
+        });
+        tpDropZone.addEventListener('dragleave', () => {
+          tpDropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+        });
+        tpDropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          tpDropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+          if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleTeacherProblemFiles({ target: { files: e.dataTransfer.files } });
+          }
+        });
+      }
+
       window.addEventListener('paste', (e) => {
         const items = e.clipboardData?.items || e.originalEvent?.clipboardData?.items; if (!items) return;
         for (let i = 0; i < items.length; i++) {
@@ -623,7 +655,7 @@
           document.getElementById('upload-preview-img').src = currentUploadedDataUrl;
         }; img.src = e.target.result;
       }; reader.readAsDataURL(file);
-      event.target.value = ''; 
+      if(event.target.value !== undefined) event.target.value = ''; 
     }
 
     function clearUploadedImage() {
@@ -686,12 +718,10 @@
       }
     }
 
-    // [핵심 패치] 학생 화면에는 '생기부 기록'을 숨기기 위한 파라미터(isStudentView) 추가
     function formatFeedbackHtml(txt, isStudentView = false) {
       if(!txt) return '';
       let res = txt;
       
-      // 학생이 보는 화면이라면 '### 5. 생기부 기록' 파트를 통째로 잘라냅니다.
       if (isStudentView) {
         res = res.split(/###\s*5\.?\s*생기부\s*기록/)[0].trim();
       }
@@ -867,7 +897,6 @@
         setDisplay('feedback-loading', 'none'); setDisplay('feedback-result', 'block');
         document.getElementById('fb-title').textContent = autoTitle;
         
-        // [핵심 패치] 학생 화면에는 생기부 기록이 보이지 않도록 true 전달
         const fbContentEl = document.getElementById('fb-content'); 
         fbContentEl.innerHTML = formatFeedbackHtml(feedback, true); 
         renderMathInContainer(fbContentEl);
@@ -914,7 +943,8 @@
     }
 
     function handleTeacherProblemFiles(e) {
-      const files = e.target.files; if (!files || files.length === 0) return;
+      const files = e.target.files || (e.dataTransfer && e.dataTransfer.files); 
+      if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (ev) => {
@@ -924,7 +954,7 @@
         };
         reader.readAsDataURL(file);
       });
-      e.target.value = ''; 
+      if(e.target.value !== undefined) e.target.value = ''; 
     }
 
     function removeAttachment(id) { tempTeacherAttachments = tempTeacherAttachments.filter(a => a.id !== id); previewTeacherProblem(); }
@@ -971,7 +1001,6 @@
       setDisplay('teacher-detail-empty', 'none'); setDisplay('teacher-detail-content', 'block');
       document.getElementById('td-title').textContent = item.title; document.getElementById('td-image').src = item.imageData;
       const fb = document.getElementById('td-feedback'); 
-      // 선생님 화면이므로 생기부 기록 숨김 처리 해제 (false)
       fb.innerHTML = formatFeedbackHtml(item.feedback, false); 
       renderMathInContainer(fb);
     }
